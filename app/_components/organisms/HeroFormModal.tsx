@@ -9,12 +9,14 @@ import { FormFieldText } from "@/app/_components/molecules/FormFieldText";
 import { FormFieldDate } from "@/app/_components/molecules/FormFieldDate";
 import { Hero } from "@/app/_models/Hero";
 
+const textValidation = z.string().min(1, "Campo obrigatório").max(100, "Máximo de 100 caracteres").regex(/^[a-zA-ZÀ-ÿ0-9\s\-',.]+$/, "Apenas letras, números e espaços permitidos");
+
 export const heroFormSchema = z.object({
-  name: z.string().min(2, "Nome é obrigatório"),
-  nickname: z.string().min(2, "Nome de guerra é obrigatório"),
+  name: textValidation,
+  nickname: textValidation,
   date_of_birth: z.string().min(1, "Data de nascimento é obrigatória"),
-  universe: z.string().min(1, "Universo é obrigatório"),
-  main_power: z.string().min(1, "Habilidade é obrigatória"),
+  universe: textValidation,
+  main_power: textValidation,
   avatar_url: z.string().url("URL inválida").refine(val => {
     return !val || /\.(jpeg|jpg|gif|png|webp|svg|bmp)(\?.*)?$/i.test(val) || val.includes('ui-avatars.com');
   }, "Deve ser um link de imagem (jpg, png, etc)").optional().or(z.literal("")),
