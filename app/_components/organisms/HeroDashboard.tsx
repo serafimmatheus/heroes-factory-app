@@ -33,7 +33,7 @@ export function HeroDashboard() {
   
   const { heroesResponse, isLoading, deactivateHero, activateHero, createHero, updateHero, deleteHero, isCreating, isUpdating, isDeleting } = useHeroes({
     page,
-    limit: 5,
+    limit: 10,
     search: activeSearch || undefined,
   });
 
@@ -49,7 +49,7 @@ export function HeroDashboard() {
 
   const heroes = heroesResponse?.data || [];
   const total = heroesResponse?.total || 0;
-  const totalPages = Math.ceil(total / 5);
+  const totalPages = Math.ceil(total / 10);
 
   const editingHero = useMemo(() => heroes.find((h) => h.id === editingHeroId) || null, [heroes, editingHeroId]);
   const viewingHero = useMemo(() => heroes.find((h) => h.id === viewingHeroId) || null, [heroes, viewingHeroId]);
@@ -96,7 +96,7 @@ export function HeroDashboard() {
 
       {isLoading ? (
         <div className="flex gap-6 flex-wrap justify-center max-w-6xl w-full opacity-60">
-          {Array.from({ length: 5 }).map((_, i) => (
+          {Array.from({ length: 10 }).map((_, i) => (
             <div key={i} className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 flex flex-col items-center w-[200px]">
               <div className="absolute top-4 right-4">
                 <Skeleton className="w-5 h-5 rounded-full" />
