@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/app/_components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/app/_components/ui/tooltip";
 import { Switch } from "@/app/_components/ui/switch";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/app/_components/ui/pagination";
 import { HeroFormModal, HeroFormData } from "./HeroFormModal";
@@ -54,7 +55,7 @@ export function HeroDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f4f5f9] flex flex-col items-center py-12 px-6">
+    <div className="min-h-screen bg-[#FAF6F2] flex flex-col items-center py-12 px-6">
       <h1 className="text-4xl font-bold text-[#0c3383] mb-12">Heróis</h1>
 
       <div className="w-full max-w-5xl flex gap-4 mb-10 items-center justify-between">
@@ -99,18 +100,28 @@ export function HeroDashboard() {
                       <Trash2 className="w-5 h-5" />
                     </DropdownMenuItem>
                     <div className="h-[1px] w-full bg-gray-100" />
-                    <DropdownMenuItem 
-                      className={`p-2 rounded-lg justify-center w-full ${hero.isActive ? 'cursor-pointer focus:bg-blue-50 text-blue-600' : 'opacity-50 cursor-not-allowed text-gray-400'}`} 
-                      onClick={(e) => {
-                        if (!hero.isActive) {
-                          e.preventDefault();
-                          return;
-                        }
-                        setEditingHeroId(hero.id);
-                      }}
-                    >
-                      <Edit2 className="w-5 h-5" />
-                    </DropdownMenuItem>
+                    {!hero.isActive ? (
+                      <Tooltip>
+                        <TooltipTrigger className="w-full">
+                          <DropdownMenuItem 
+                            className="p-2 rounded-lg justify-center w-full opacity-50 cursor-not-allowed text-gray-400" 
+                            onClick={(e) => e.preventDefault()}
+                          >
+                            <Edit2 className="w-5 h-5" />
+                          </DropdownMenuItem>
+                        </TooltipTrigger>
+                        <TooltipContent side="left" className="bg-gray-800 text-white rounded-lg">
+                          <p>Ative o herói para poder editar</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : (
+                      <DropdownMenuItem 
+                        className="p-2 cursor-pointer focus:bg-blue-50 text-blue-600 rounded-lg justify-center w-full" 
+                        onClick={() => setEditingHeroId(hero.id)}
+                      >
+                        <Edit2 className="w-5 h-5" />
+                      </DropdownMenuItem>
+                    )}
                     <div className="h-[1px] w-full bg-gray-100" />
                     <div className="py-2 flex justify-center w-full">
                       <Switch 
