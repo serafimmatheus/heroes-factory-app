@@ -27,10 +27,10 @@ export function useHeroes(params?: FetchHeroesParams) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: HEROES_QUERY_KEY });
-      toast.show({ type: "success", title: "Sucesso", description: "Herói criado com sucesso!" });
+      toast.add({ type: "success", title: "Sucesso", description: "Herói criado com sucesso!" });
     },
     onError: (error: any) => {
-      toast.show({ type: "error", title: "Erro", description: error.message || "Erro ao criar herói" });
+      toast.add({ type: "error", title: "Erro", description: error.message || "Erro ao criar herói" });
     }
   });
 
@@ -42,10 +42,10 @@ export function useHeroes(params?: FetchHeroesParams) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: HEROES_QUERY_KEY });
-      toast.show({ type: "success", title: "Sucesso", description: "Herói atualizado com sucesso!" });
+      toast.add({ type: "success", title: "Sucesso", description: "Herói atualizado com sucesso!" });
     },
     onError: (error: any) => {
-      toast.show({ type: "error", title: "Erro", description: error.message || "Erro ao atualizar herói" });
+      toast.add({ type: "error", title: "Erro", description: error.message || "Erro ao atualizar herói" });
     }
   });
 
@@ -56,10 +56,10 @@ export function useHeroes(params?: FetchHeroesParams) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: HEROES_QUERY_KEY });
-      toast.show({ type: "success", title: "Sucesso", description: "Herói ativado com sucesso!" });
+      toast.add({ type: "success", title: "Sucesso", description: "Herói ativado com sucesso!" });
     },
     onError: (error: any) => {
-      toast.show({ type: "error", title: "Erro", description: error.message || "Erro ao ativar herói" });
+      toast.add({ type: "error", title: "Erro", description: error.message || "Erro ao ativar herói" });
     }
   });
 
@@ -70,10 +70,10 @@ export function useHeroes(params?: FetchHeroesParams) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: HEROES_QUERY_KEY });
-      toast.show({ type: "success", title: "Sucesso", description: "Herói desativado com sucesso!" });
+      toast.add({ type: "success", title: "Sucesso", description: "Herói desativado com sucesso!" });
     },
     onError: (error: any) => {
-      toast.show({ type: "error", title: "Erro", description: error.message || "Erro ao desativar herói" });
+      toast.add({ type: "error", title: "Erro", description: error.message || "Erro ao desativar herói" });
     }
   });
 
@@ -84,10 +84,10 @@ export function useHeroes(params?: FetchHeroesParams) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: HEROES_QUERY_KEY });
-      toast.show({ type: "success", title: "Sucesso", description: "Herói deletado com sucesso!" });
+      toast.add({ type: "success", title: "Sucesso", description: "Herói deletado com sucesso!" });
     },
     onError: (error: any) => {
-      toast.show({ type: "error", title: "Erro", description: error.message || "Erro ao deletar herói" });
+      toast.add({ type: "error", title: "Erro", description: error.message || "Erro ao deletar herói" });
     }
   });
 
