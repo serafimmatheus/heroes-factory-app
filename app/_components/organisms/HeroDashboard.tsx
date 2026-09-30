@@ -160,37 +160,35 @@ export function HeroDashboard() {
         </div>
       )}
 
-      {totalPages > 1 && (
-        <div className="mt-auto pt-12">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious 
-                  onClick={() => setPage(p => Math.max(1, p - 1))} 
-                  className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                />
+      <div className="mt-auto pt-12">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious 
+                onClick={() => setPage(p => Math.max(1, p - 1))} 
+                className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              />
+            </PaginationItem>
+            {Array.from({ length: Math.max(1, totalPages) }).map((_, i) => (
+              <PaginationItem key={i}>
+                <PaginationLink 
+                  onClick={() => setPage(i + 1)}
+                  isActive={page === i + 1}
+                  className="cursor-pointer"
+                >
+                  {i + 1}
+                </PaginationLink>
               </PaginationItem>
-              {Array.from({ length: totalPages }).map((_, i) => (
-                <PaginationItem key={i}>
-                  <PaginationLink 
-                    onClick={() => setPage(i + 1)}
-                    isActive={page === i + 1}
-                    className="cursor-pointer"
-                  >
-                    {i + 1}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              <PaginationItem>
-                <PaginationNext 
-                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                  className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      )}
+            ))}
+            <PaginationItem>
+              <PaginationNext 
+                onClick={() => setPage(p => Math.min(Math.max(1, totalPages), p + 1))}
+                className={page === Math.max(1, totalPages) ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
 
       <HeroFormModal 
         isOpen={isCreateOpen || !!editingHeroId} 
