@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useHeroes } from "@/app/_hooks/useHeroes";
 import { Button } from "@/app/_components/ui/button";
 import { Input } from "@/app/_components/ui/input";
@@ -13,22 +13,21 @@ import {
 } from "@/app/_components/ui/dropdown-menu";
 import { Switch } from "@/app/_components/ui/switch";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/app/_components/ui/pagination";
-// import CreateHeroModal from "./CreateHeroModal";
-// import ViewHeroModal from "./ViewHeroModal";
+import { HeroFormModal, HeroFormData } from "./HeroFormModal";
 
 export function HeroDashboard() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [activeSearch, setActiveSearch] = useState("");
   
-  const { heroesResponse, isLoading, deactivateHero, activateHero } = useHeroes({
+  const { heroesResponse, isLoading, deactivateHero, activateHero, createHero, updateHero, isCreating, isUpdating } = useHeroes({
     page,
     limit: 5,
     search: activeSearch || undefined,
   });
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [viewingHeroId, setViewingHeroId] = useState<string | null>(null);
+  const [editingHeroId, setEditingHeroId] = useState<string | null>(null);
 
   const handleSearch = () => {
     setActiveSearch(search);
@@ -38,6 +37,18 @@ export function HeroDashboard() {
   const heroes = heroesResponse?.data || [];
   const total = heroesResponse?.total || 0;
   const totalPages = Math.ceil(total / 5);
+
+  const editingHero = useMemo(() => heroes.find((h) => h.id === editingHeroId) || null, [heroes, editingHeroId]);
+
+  const handleFormSubmit = async (data: HeroFormData) => {
+    if (editingHeroId) {
+      await updateHero({ id: editingHeroId, payload: data });
+      setEditingHeroId(null);
+    } else {
+      await createHero(data);
+      setIsCreateOpen(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#f4f5f9] flex flex-col items-center py-12 px-6">
@@ -85,7 +96,7 @@ export function HeroDashboard() {
                       <Trash2 className="w-5 h-5" />
                     </DropdownMenuItem>
                     <div className="h-[1px] w-full bg-gray-100" />
-                    <DropdownMenuItem className="p-2 cursor-pointer focus:bg-blue-50 text-blue-600 rounded-lg justify-center w-full" onClick={() => setViewingHeroId(hero.id)}>
+                    <DropdownMenuItem className="p-2 cursor-pointer focus:bg-blue-50 text-blue-600 rounded-lg justify-center w-full" onClick={() => setEditingHeroId(hero.id)}>
                       <Edit2 className="w-5 h-5" />
                     </DropdownMenuItem>
                     <div className="h-[1px] w-full bg-gray-100" />
@@ -101,7 +112,7 @@ export function HeroDashboard() {
 
               <div 
                 className="w-32 h-32 rounded-full overflow-hidden mb-6 mt-4 border-2 border-transparent hover:border-gray-100 cursor-pointer transition-all"
-                onClick={() => setViewingHeroId(hero.id)}
+                onClick={() => setEditingHeroId(hero.id)}
               >
                 {hero.avatarUrl ? (
                   <img src={hero.avatarUrl} alt={hero.name} className="w-full h-full object-cover" />
@@ -148,6 +159,17 @@ export function HeroDashboard() {
           </Pagination>
         </div>
       )}
+
+      <HeroFormModal 
+        isOpen={isCreateOpen || !!editingHeroId} 
+        onClose={() => {
+          setIsCreateOpen(false);
+          setEditingHeroId(null);
+        }}
+        hero={editingHero}
+        onSubmit={handleFormSubmit}
+        isLoading={isCreating || isUpdating}
+      />
     </div>
   );
 }
