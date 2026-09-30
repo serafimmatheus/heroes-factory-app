@@ -1,0 +1,332 @@
+---
+description: Padrões de Frontend - Next.js (App Router), React, Shadcn, Zod, React Hook Form, Atomic Design, POO, Axios, TanStack Query e Server Actions
+globs: src/**/*.{ts,tsx}
+---
+
+# Diretrizes de Engenharia Frontend: Next.js, Atomic Design & POO
+
+Você é um engenheiro de software sênior especialista em ecossistema React, Next.js (App Router) e TypeScript. Siga rigorosamente este padrão de arquitetura, estruturação de componentes, consumo de APIs e Programação Orientada a Objetos (POO).
+
+---
+
+## 1. Stack Tecnológica Obrigatória
+
+- **Framework:** Next.js (App Router) com React.
+- **Linguagem:** TypeScript em modo estrito (Strict Mode).
+- **Estilização:** Tailwind CSS.
+- **Componentes Base:** Shadcn UI (Radix Primitives).
+- **Formulários:** React Hook Form integrado com Zod (`@hookform/resolvers/zod`).
+- **Comunicação HTTP:** Axios encapsulado em classes de serviço (POO).
+- **Gerenciamento de Estado Server/Cache:** TanStack Query (React Query) + Server Actions do Next.js.
+- **Design Pattern de UI:** Atomic Design (Atoms, Molecules, Organisms, Templates, Pages).
+
+---
+
+## 2. Estrutura de Pastas Obrigatória
+
+```text
+src/
+├── actions/                  # Server Actions do Next.js ("use server")
+├── app/                      # Rotas e páginas do App Router (Pages do Atomic Design)
+├── components/               # Atomic Design
+│   ├── ui/                   # Componentes primitivos do Shadcn UI
+│   ├── atoms/                # Elementos indivisíveis (Badges, Icons encapsulados, Labels)
+│   ├── molecules/            # Combinações simples (FormFields, SearchBars, DropdownItems)
+│   ├── organisms/            # Blocos complexos e autônomos (Forms completos, Headers, Tabelas)
+│   └── templates/            # Estruturas de layout (DashboardTemplate, AuthTemplate)
+├── hooks/                    # Custom hooks para encapsular TanStack Query e estados
+├── models/                   # Classes de Entidades de Domínio puras (POO)
+├── services/                 # Classes de Serviços HTTP encapsulando Axios (POO)
+└── lib/                      # Utilitários globais (axiosInstance.ts, queryClient.ts, utils.ts)
+```
+
+## 3. Diretrizes de POO e Clean Code no Frontend
+
+**Entidades de Domínio com Classes (src/models/):**
+- Não use apenas interfaces anêmicas para representar modelos de negócio.
+- Crie classes ricas com métodos de domínio, formatação, validação de regras de interface e cálculos.
+
+**Serviços HTTP Orientados a Objetos (src/services/):**
+- Chamadas HTTP via Axios nunca devem ser feitas soltas dentro de componentes ou actions.
+- Agrupe os endpoints em classes de serviços com métodos estáticos ou instanciáveis (ex: PatientService).
+
+**Tipagem Rigorosa:**
+- Zero tolerância com `any`: use sempre tipagem estrita, tipos utilitários (`Partial`, `Pick`, `Omit`) ou `unknown`.
+- Inferência obrigatória de schemas de formulário com `z.infer<typeof schema>`.
+
+---
+
+## 4. Templates de Implementação
+
+### 4.1. Configuração Base do Axios (src/lib/axios.ts)
+
+```typescript
+import axios from "axios";
+
+export const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "/api",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+```
+
+### 4.2. Classe de Entidade de Domínio - POO (src/models/Patient.ts)
+
+```typescript
+export interface IPatientData {
+  id: string;
+  name: string;
+  birthDate?: string | Date;
+  status: "active" | "inactive";
+  createdAt: string;
+}
+
+export class Patient {
+  public readonly id: string;
+  public readonly name: string;
+  public readonly birthDate?: Date;
+  public readonly status: "active" | "inactive";
+  public readonly createdAt: Date;
+
+  constructor(data: IPatientData) {
+    this.id = data.id;
+    this.name = data.name;
+    this.birthDate = data.birthDate ? new Date(data.birthDate) : undefined;
+    this.status = data.status;
+    this.createdAt = new Date(data.createdAt);
+  }
+
+  public get isActive(): boolean {
+    return this.status === "active";
+  }
+
+  public get formattedBirthDate(): string {
+    if (!this.birthDate) return "Não informada";
+    return new Intl.DateTimeFormat("pt-BR").format(this.birthDate);
+  }
+}
+```
+
+### 4.3. Classe de Serviço de API - POO (src/services/PatientService.ts)
+
+```typescript
+import { api } from "@/lib/axios";
+import { Patient, IPatientData } from "@/models/Patient";
+
+export interface CreatePatientDTO {
+  name: string;
+  birthDate?: string;
+  status: "active" | "inactive";
+}
+
+export class PatientService {
+  public static async getAll(): Promise<Patient[]> {
+    const response = await api.get<IPatientData[]>("/patients");
+    return response.data.map((item) => new Patient(item));
+  }
+
+  public static async getById(id: string): Promise<Patient> {
+    const response = await api.get<IPatientData>(`/patients/${id}`);
+    return new Patient(response.data);
+  }
+
+  public static async create(payload: CreatePatientDTO): Promise<Patient> {
+    const response = await api.post<IPatientData>("/patients", payload);
+    return new Patient(response.data);
+  }
+}
+```
+
+### 4.4. Next.js Server Action (src/actions/patient-actions.ts)
+
+```typescript
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { CreatePatientDTO } from "@/services/PatientService";
+
+export async function createPatientAction(data: CreatePatientDTO) {
+  try {
+    const response = await fetch(`${process.env.API_INTERNAL_URL}/patients`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error("Erro ao criar paciente.");
+    }
+
+    revalidatePath("/patients");
+    return { success: true, data: await response.json() };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Erro desconhecido",
+    };
+  }
+}
+```
+
+### 4.5. Custom Hook com TanStack Query (src/hooks/usePatients.ts)
+
+```typescript
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { PatientService, CreatePatientDTO } from "@/services/PatientService";
+import { createPatientAction } from "@/actions/patient-actions";
+
+export const PATIENTS_QUERY_KEY = ["patients"];
+
+export function usePatients() {
+  const queryClient = useQueryClient();
+
+  const patientsQuery = useQuery({
+    queryKey: PATIENTS_QUERY_KEY,
+    queryFn: () => PatientService.getAll(),
+  });
+
+  const createPatientMutation = useMutation({
+    mutationFn: async (payload: CreatePatientDTO) => {
+      // Executa a action do servidor
+      const result = await createPatientAction(payload);
+      if (!result.success) throw new Error(result.error);
+      return result.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: PATIENTS_QUERY_KEY });
+    },
+  });
+
+  return {
+    patients: patientsQuery.data ?? [],
+    isLoading: patientsQuery.isLoading,
+    isError: patientsQuery.isError,
+    createPatient: createPatientMutation.mutateAsync,
+    isCreating: createPatientMutation.isPending,
+  };
+}
+```
+
+### 4.6. Molecule: Campo de Formulário com Shadcn (src/components/molecules/FormFieldText.tsx)
+
+```typescript
+import React from "react";
+import { Control, FieldPath, FieldValues } from "react-hook-form";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+
+interface FormFieldTextProps<T extends FieldValues> {
+  control: Control<T>;
+  name: FieldPath<T>;
+  label: string;
+  placeholder?: string;
+  type?: string;
+}
+
+export function FormFieldText<T extends FieldValues>({
+  control,
+  name,
+  label,
+  placeholder,
+  type = "text",
+}: FormFieldTextProps<T>) {
+  return (
+    <FormField
+      control={control}
+      name={name}
+      render={({ field }) => (
+        <FormItem className="w-full">
+          <FormLabel>{label}</FormLabel>
+          <FormControl>
+            <Input placeholder={placeholder} type={type} {...field} />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
+```
+
+### 4.7. Organism: Formulário Completo (src/components/organisms/PatientCreateForm.tsx)
+
+```typescript
+"use client";
+
+import React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Form } from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import { FormFieldText } from "@/components/molecules/FormFieldText";
+import { usePatients } from "@/hooks/usePatients";
+
+export const patientFormSchema = z.object({
+  name: z.string().min(2, "O nome deve ter no mínimo 2 caracteres"),
+  birthDate: z.string().optional(),
+  status: z.enum(["active", "inactive"]).default("active"),
+});
+
+export type PatientFormData = z.infer<typeof patientFormSchema>;
+
+export function PatientCreateForm() {
+  const { createPatient, isCreating } = usePatients();
+
+  const form = useForm<PatientFormData>({
+    resolver: zodResolver(patientFormSchema),
+    defaultValues: {
+      name: "",
+      birthDate: "",
+      status: "active",
+    },
+  });
+
+  async function onSubmit(data: PatientFormData) {
+    try {
+      await createPatient(data);
+      form.reset();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormFieldText control={form.control} label="Nome Completo" name="name" placeholder="Ex: João da Silva" />
+        <FormFieldText control={form.control} label="Data de Nascimento" name="birthDate" type="date" />
+        <Button className="w-full" disabled={isCreating} type="submit">
+          {isCreating ? "Salvando..." : "Cadastrar Paciente"}
+        </Button>
+      </form>
+    </Form>
+  );
+}
+```
+
+---
+
+## 5. Regras Mandatórias de Código para a IA
+
+**Separação Rígida do Atomic Design:**
+- Componentes em `atoms/` não possuem lógica de negócio ou dependência de formulários.
+- Componentes em `molecules/` combinam átomos (ex: Label + Input + Message).
+- Componentes em `organisms/` conectam estados complexos, formulários ou queries.
+- Componentes em `templates/` recebem conteúdo via children ou props e estruturam o grid/layout da página.
+
+**Encapsulamento de HTTP:** 
+- Nunca execute `axios.get` ou `axios.post` dentro de um componente React ou dentro de custom hooks. Sempre chame métodos estáticos da classe de serviço correspondente (`[Dominio]Service`).
+
+**Composição TanStack Query + Server Actions:** 
+- Use mutations chamando Server Actions para disparar mutações que alteram dados e invalidem caches de queries (`invalidateQueries`) no `onSuccess`.
+
+**Imports com Aliases:** 
+- Use exclusivamente o alias `@/` apontando para `src/` (ex: `@/components/ui/button`, `@/services/PatientService`).
