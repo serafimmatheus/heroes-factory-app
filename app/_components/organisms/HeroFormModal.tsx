@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/app/_compone
 import { Form } from "@/app/_components/ui/form";
 import { Button } from "@/app/_components/ui/button";
 import { FormFieldText } from "@/app/_components/molecules/FormFieldText";
+import { FormFieldDate } from "@/app/_components/molecules/FormFieldDate";
 import { Hero } from "@/app/_models/Hero";
 
 export const heroFormSchema = z.object({
@@ -99,7 +100,7 @@ export function HeroFormModal({ isOpen, onClose, hero, onSubmit, isLoading }: He
               
               <div className="flex gap-4">
                 <div className="flex-1">
-                  <FormFieldText control={form.control} label="Data de nascimento" name="date_of_birth" type="date" />
+                  <FormFieldDate control={form.control} label="Data de nascimento" name="date_of_birth" />
                 </div>
                 <div className="flex-1">
                   <FormFieldText control={form.control} label="Universo" name="universe" placeholder="Digite o universo" />
