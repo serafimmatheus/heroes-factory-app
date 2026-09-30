@@ -21,6 +21,7 @@ import {
 } from "@/app/_components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/app/_components/ui/tooltip";
 import { Switch } from "@/app/_components/ui/switch";
+import { Skeleton } from "@/app/_components/ui/skeleton";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/app/_components/ui/pagination";
 import { HeroFormModal, HeroFormData } from "./HeroFormModal";
 import { HeroViewModal } from "./HeroViewModal";
@@ -94,7 +95,17 @@ export function HeroDashboard() {
       </div>
 
       {isLoading ? (
-        <div className="flex-1 flex justify-center mt-20">Carregando...</div>
+        <div className="flex gap-6 flex-wrap justify-center max-w-6xl w-full opacity-60">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 flex flex-col items-center w-[200px]">
+              <div className="absolute top-4 right-4">
+                <Skeleton className="w-5 h-5 rounded-full" />
+              </div>
+              <Skeleton className="w-32 h-32 rounded-full mb-6 mt-4" />
+              <Skeleton className="h-6 w-3/4 rounded" />
+            </div>
+          ))}
+        </div>
       ) : (
         <div className="flex gap-6 flex-wrap justify-center max-w-6xl w-full">
           {heroes.map((hero) => (
