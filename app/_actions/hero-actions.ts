@@ -73,12 +73,32 @@ export async function activateHeroAction(id: string) {
 
 export async function deactivateHeroAction(id: string) {
   try {
+    const response = await fetch(`${API_URL}/heroes/${id}/deactivate`, {
+      method: "PATCH",
+    });
+
+    if (!response.ok) {
+      throw new Error("Erro ao desativar herói.");
+    }
+
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Erro desconhecido",
+    };
+  }
+}
+
+export async function deleteHeroAction(id: string) {
+  try {
     const response = await fetch(`${API_URL}/heroes/${id}`, {
       method: "DELETE",
     });
 
     if (!response.ok) {
-      throw new Error("Erro ao desativar herói.");
+      throw new Error("Erro ao deletar herói.");
     }
 
     revalidatePath("/");

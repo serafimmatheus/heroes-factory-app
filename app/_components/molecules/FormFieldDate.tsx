@@ -92,7 +92,7 @@ export function FormFieldDate<T extends FieldValues>({
                   <Popover open={open} onOpenChange={setOpen}>
                     <PopoverTrigger 
                       render={
-                        <InputGroupButton variant="ghost" size="icon" aria-label="Selecione a data" className="h-full px-3 rounded-none rounded-r-xl bg-white">
+                        <InputGroupButton variant="ghost" size="icon-sm" aria-label="Selecione a data" className="h-full px-3 rounded-none rounded-r-xl bg-white">
                           <CalendarIcon className="h-5 w-5 text-gray-500" />
                           <span className="sr-only">Selecione a data</span>
                         </InputGroupButton>

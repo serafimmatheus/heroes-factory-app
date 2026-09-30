@@ -1,10 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "@/app/_components/ui/toast";
 import { HeroService, CreateHeroDTO, UpdateHeroDTO, FetchHeroesParams } from "@/app/_services/HeroService";
 import {
   createHeroAction,
   updateHeroAction,
   activateHeroAction,
   deactivateHeroAction,
+  deleteHeroAction,
 } from "@/app/_actions/hero-actions";
 
 export const HEROES_QUERY_KEY = ["heroes"];
@@ -25,7 +27,11 @@ export function useHeroes(params?: FetchHeroesParams) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: HEROES_QUERY_KEY });
+      toast.show({ type: "success", title: "Sucesso", description: "Herói criado com sucesso!" });
     },
+    onError: (error: any) => {
+      toast.show({ type: "error", title: "Erro", description: error.message || "Erro ao criar herói" });
+    }
   });
 
   const updateHeroMutation = useMutation({
@@ -36,7 +42,11 @@ export function useHeroes(params?: FetchHeroesParams) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: HEROES_QUERY_KEY });
+      toast.show({ type: "success", title: "Sucesso", description: "Herói atualizado com sucesso!" });
     },
+    onError: (error: any) => {
+      toast.show({ type: "error", title: "Erro", description: error.message || "Erro ao atualizar herói" });
+    }
   });
 
   const activateHeroMutation = useMutation({
@@ -46,7 +56,11 @@ export function useHeroes(params?: FetchHeroesParams) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: HEROES_QUERY_KEY });
+      toast.show({ type: "success", title: "Sucesso", description: "Herói ativado com sucesso!" });
     },
+    onError: (error: any) => {
+      toast.show({ type: "error", title: "Erro", description: error.message || "Erro ao ativar herói" });
+    }
   });
 
   const deactivateHeroMutation = useMutation({
@@ -56,7 +70,25 @@ export function useHeroes(params?: FetchHeroesParams) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: HEROES_QUERY_KEY });
+      toast.show({ type: "success", title: "Sucesso", description: "Herói desativado com sucesso!" });
     },
+    onError: (error: any) => {
+      toast.show({ type: "error", title: "Erro", description: error.message || "Erro ao desativar herói" });
+    }
+  });
+
+  const deleteHeroMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const result = await deleteHeroAction(id);
+      if (!result.success) throw new Error(result.error);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: HEROES_QUERY_KEY });
+      toast.show({ type: "success", title: "Sucesso", description: "Herói deletado com sucesso!" });
+    },
+    onError: (error: any) => {
+      toast.show({ type: "error", title: "Erro", description: error.message || "Erro ao deletar herói" });
+    }
   });
 
   return {
@@ -76,5 +108,8 @@ export function useHeroes(params?: FetchHeroesParams) {
 
     deactivateHero: deactivateHeroMutation.mutateAsync,
     isDeactivating: deactivateHeroMutation.isPending,
+
+    deleteHero: deleteHeroMutation.mutateAsync,
+    isDeleting: deleteHeroMutation.isPending,
   };
 }

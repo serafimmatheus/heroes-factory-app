@@ -11,6 +11,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/app/_components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/app/_components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/app/_components/ui/tooltip";
 import { Switch } from "@/app/_components/ui/switch";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/app/_components/ui/pagination";
@@ -22,7 +30,7 @@ export function HeroDashboard() {
   const [search, setSearch] = useState("");
   const [activeSearch, setActiveSearch] = useState("");
   
-  const { heroesResponse, isLoading, deactivateHero, activateHero, createHero, updateHero, isCreating, isUpdating } = useHeroes({
+  const { heroesResponse, isLoading, deactivateHero, activateHero, createHero, updateHero, deleteHero, isCreating, isUpdating, isDeleting } = useHeroes({
     page,
     limit: 5,
     search: activeSearch || undefined,
@@ -31,6 +39,7 @@ export function HeroDashboard() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingHeroId, setEditingHeroId] = useState<string | null>(null);
   const [viewingHeroId, setViewingHeroId] = useState<string | null>(null);
+  const [deletingHeroId, setDeletingHeroId] = useState<string | null>(null);
 
   const handleSearch = () => {
     setActiveSearch(search);
@@ -96,7 +105,7 @@ export function HeroDashboard() {
                     <MoreVertical className="w-5 h-5 text-gray-400" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-16 min-w-0 p-2 flex flex-col gap-3 items-center rounded-xl shadow-lg border-gray-100">
-                    <DropdownMenuItem className="p-2 cursor-pointer focus:bg-red-50 text-red-500 rounded-lg justify-center w-full" onClick={() => deactivateHero(hero.id)}>
+                    <DropdownMenuItem className="p-2 cursor-pointer focus:bg-red-50 text-red-500 rounded-lg justify-center w-full" onClick={() => setDeletingHeroId(hero.id)}>
                       <Trash2 className="w-5 h-5" />
                     </DropdownMenuItem>
                     <div className="h-[1px] w-full bg-gray-100" />
@@ -199,6 +208,32 @@ export function HeroDashboard() {
         onClose={() => setViewingHeroId(null)}
         hero={viewingHero}
       />
+
+      <Dialog open={!!deletingHeroId} onOpenChange={(open) => !open && setDeletingHeroId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Deletar Herói</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja deletar este herói? Esta ação é irreversível.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeletingHeroId(null)} disabled={isDeleting}>Cancelar</Button>
+            <Button 
+              className="bg-red-500 hover:bg-red-600 text-white" 
+              onClick={async () => {
+                if (deletingHeroId) {
+                  await deleteHero(deletingHeroId);
+                  setDeletingHeroId(null);
+                }
+              }}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deletando..." : "Deletar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
