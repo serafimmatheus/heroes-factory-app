@@ -15,7 +15,7 @@ export async function createHeroAction(data: CreateHeroDTO) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
-      throw new Error(errorData?.message || "Erro ao criar herói.");
+      throw new Error(errorData?.error || errorData?.message || "Erro.");
     }
 
     revalidatePath("/");
@@ -38,7 +38,7 @@ export async function updateHeroAction(id: string, data: UpdateHeroDTO) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
-      throw new Error(errorData?.message || "Erro ao atualizar herói.");
+      throw new Error(errorData?.error || errorData?.message || "Erro.");
     }
 
     revalidatePath("/");

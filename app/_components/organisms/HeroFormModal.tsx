@@ -71,7 +71,7 @@ export function HeroFormModal({ isOpen, onClose, hero, onSubmit, isLoading }: He
     };
     
     if (!payload.avatar_url) {
-      delete payload.avatar_url;
+      payload.avatar_url = null;
     }
 
     try {

@@ -16,7 +16,7 @@ export interface UpdateHeroDTO {
   date_of_birth?: string;
   universe?: string;
   main_power?: string;
-  avatar_url?: string;
+  avatar_url?: string | null;
 }
 
 export interface FetchHeroesParams {

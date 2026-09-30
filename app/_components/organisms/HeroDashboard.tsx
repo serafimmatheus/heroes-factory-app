@@ -14,6 +14,7 @@ import {
 import { Switch } from "@/app/_components/ui/switch";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/app/_components/ui/pagination";
 import { HeroFormModal, HeroFormData } from "./HeroFormModal";
+import { HeroViewModal } from "./HeroViewModal";
 
 export function HeroDashboard() {
   const [page, setPage] = useState(1);
@@ -28,6 +29,7 @@ export function HeroDashboard() {
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingHeroId, setEditingHeroId] = useState<string | null>(null);
+  const [viewingHeroId, setViewingHeroId] = useState<string | null>(null);
 
   const handleSearch = () => {
     setActiveSearch(search);
@@ -39,6 +41,7 @@ export function HeroDashboard() {
   const totalPages = Math.ceil(total / 5);
 
   const editingHero = useMemo(() => heroes.find((h) => h.id === editingHeroId) || null, [heroes, editingHeroId]);
+  const viewingHero = useMemo(() => heroes.find((h) => h.id === viewingHeroId) || null, [heroes, viewingHeroId]);
 
   const handleFormSubmit = async (data: HeroFormData) => {
     if (editingHeroId) {
@@ -96,7 +99,16 @@ export function HeroDashboard() {
                       <Trash2 className="w-5 h-5" />
                     </DropdownMenuItem>
                     <div className="h-[1px] w-full bg-gray-100" />
-                    <DropdownMenuItem className="p-2 cursor-pointer focus:bg-blue-50 text-blue-600 rounded-lg justify-center w-full" onClick={() => setEditingHeroId(hero.id)}>
+                    <DropdownMenuItem 
+                      className={`p-2 rounded-lg justify-center w-full ${hero.isActive ? 'cursor-pointer focus:bg-blue-50 text-blue-600' : 'opacity-50 cursor-not-allowed text-gray-400'}`} 
+                      onClick={(e) => {
+                        if (!hero.isActive) {
+                          e.preventDefault();
+                          return;
+                        }
+                        setEditingHeroId(hero.id);
+                      }}
+                    >
                       <Edit2 className="w-5 h-5" />
                     </DropdownMenuItem>
                     <div className="h-[1px] w-full bg-gray-100" />
@@ -112,7 +124,7 @@ export function HeroDashboard() {
 
               <div 
                 className="w-32 h-32 rounded-full overflow-hidden mb-6 mt-4 border-2 border-transparent hover:border-gray-100 cursor-pointer transition-all"
-                onClick={() => setEditingHeroId(hero.id)}
+                onClick={() => setViewingHeroId(hero.id)}
               >
                 {hero.avatarUrl ? (
                   <img src={hero.avatarUrl} alt={hero.name} className="w-full h-full object-cover" />
@@ -169,6 +181,12 @@ export function HeroDashboard() {
         hero={editingHero}
         onSubmit={handleFormSubmit}
         isLoading={isCreating || isUpdating}
+      />
+
+      <HeroViewModal
+        isOpen={!!viewingHeroId}
+        onClose={() => setViewingHeroId(null)}
+        hero={viewingHero}
       />
     </div>
   );
