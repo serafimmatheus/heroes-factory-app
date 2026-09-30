@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useHeroes } from "@/app/_hooks/useHeroes";
 import { Button } from "@/app/_components/ui/button";
@@ -71,6 +71,12 @@ export function HeroDashboard() {
   const heroes = heroesResponse?.data || [];
   const total = heroesResponse?.total || 0;
   const totalPages = Math.ceil(total / 10);
+
+  useEffect(() => {
+    if (!isLoading && totalPages > 0 && page > totalPages) {
+      handlePageChange(1);
+    }
+  }, [page, totalPages, isLoading]);
 
   const editingHero = useMemo(() => heroes.find((h) => h.id === editingHeroId) || null, [heroes, editingHeroId]);
   const viewingHero = useMemo(() => heroes.find((h) => h.id === viewingHeroId) || null, [heroes, viewingHeroId]);
