@@ -19,9 +19,6 @@ export function HeroViewModal({ isOpen, onClose, hero }: HeroViewModalProps) {
           <DialogTitle className="text-xl font-semibold text-gray-800">
             {hero.name}
           </DialogTitle>
-          <Button variant="ghost" onClick={onClose} className="h-8 w-8 p-0 rounded-full hover:bg-gray-100">
-            <X className="h-4 w-4 text-gray-500" />
-          </Button>
         </DialogHeader>
 
         <div className="p-8 flex flex-col items-center">
