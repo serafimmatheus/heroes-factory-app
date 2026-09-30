@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useHeroes } from "@/app/_hooks/useHeroes";
 import { Button } from "@/app/_components/ui/button";
 import { Input } from "@/app/_components/ui/input";
@@ -27,10 +28,18 @@ import { HeroFormModal, HeroFormData } from "./HeroFormModal";
 import { HeroViewModal } from "./HeroViewModal";
 
 export function HeroDashboard() {
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const [activeSearch, setActiveSearch] = useState("");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const pageQuery = searchParams.get("page");
+  const searchQuery = searchParams.get("search") || "";
   
+  const page = pageQuery ? parseInt(pageQuery, 10) : 1;
+  const activeSearch = searchQuery;
+
+  const [search, setSearch] = useState(searchQuery);
+
   const { heroesResponse, isLoading, deactivateHero, activateHero, createHero, updateHero, deleteHero, isCreating, isUpdating, isDeleting } = useHeroes({
     page,
     limit: 10,
@@ -42,9 +51,21 @@ export function HeroDashboard() {
   const [viewingHeroId, setViewingHeroId] = useState<string | null>(null);
   const [deletingHeroId, setDeletingHeroId] = useState<string | null>(null);
 
+  const handlePageChange = (newPage: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", newPage.toString());
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
   const handleSearch = () => {
-    setActiveSearch(search);
-    setPage(1);
+    const params = new URLSearchParams(searchParams.toString());
+    if (search) {
+      params.set("search", search);
+    } else {
+      params.delete("search");
+    }
+    params.set("page", "1");
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   const heroes = heroesResponse?.data || [];
@@ -176,14 +197,14 @@ export function HeroDashboard() {
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious 
-                onClick={() => setPage(p => Math.max(1, p - 1))} 
+                onClick={() => handlePageChange(Math.max(1, page - 1))} 
                 className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
               />
             </PaginationItem>
             {Array.from({ length: Math.max(1, totalPages) }).map((_, i) => (
               <PaginationItem key={i}>
                 <PaginationLink 
-                  onClick={() => setPage(i + 1)}
+                  onClick={() => handlePageChange(i + 1)}
                   isActive={page === i + 1}
                   className="cursor-pointer"
                 >
@@ -193,7 +214,7 @@ export function HeroDashboard() {
             ))}
             <PaginationItem>
               <PaginationNext 
-                onClick={() => setPage(p => Math.min(Math.max(1, totalPages), p + 1))}
+                onClick={() => handlePageChange(Math.min(Math.max(1, totalPages), page + 1))}
                 className={page === Math.max(1, totalPages) ? "pointer-events-none opacity-50" : "cursor-pointer"}
               />
             </PaginationItem>
