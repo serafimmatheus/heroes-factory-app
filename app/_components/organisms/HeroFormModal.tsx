@@ -15,7 +15,9 @@ export const heroFormSchema = z.object({
   date_of_birth: z.string().min(1, "Data de nascimento é obrigatória"),
   universe: z.string().min(1, "Universo é obrigatório"),
   main_power: z.string().min(1, "Habilidade é obrigatória"),
-  avatar_url: z.string().url("URL inválida").optional().or(z.literal("")),
+  avatar_url: z.string().url("URL inválida").refine(val => {
+    return !val || /\.(jpeg|jpg|gif|png|webp|svg|bmp)(\?.*)?$/i.test(val) || val.includes('ui-avatars.com');
+  }, "Deve ser um link de imagem (jpg, png, etc)").optional().or(z.literal("")),
 });
 
 export type HeroFormData = z.infer<typeof heroFormSchema>;
