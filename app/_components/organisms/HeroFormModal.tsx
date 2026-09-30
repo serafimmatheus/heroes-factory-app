@@ -65,11 +65,22 @@ export function HeroFormModal({ isOpen, onClose, hero, onSubmit, isLoading }: He
   }, [isOpen, hero, form]);
 
   const handleSubmit = async (data: HeroFormData) => {
-    await onSubmit({
+    const payload: any = {
       ...data,
       date_of_birth: new Date(data.date_of_birth).toISOString(),
-    });
-    onClose();
+    };
+    
+    if (!payload.avatar_url) {
+      delete payload.avatar_url;
+    }
+
+    try {
+      await onSubmit(payload);
+      onClose();
+    } catch (error) {
+      console.error(error);
+      alert(error instanceof Error ? error.message : "Erro ao salvar");
+    }
   };
 
   return (
