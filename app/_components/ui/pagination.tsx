@@ -46,9 +46,15 @@ function PaginationLink({
 }: PaginationLinkProps) {
   return (
     <Button
-      variant={isActive ? "outline" : "ghost"}
+      variant="ghost"
       size={size}
-      className={cn(className)}
+      className={cn(
+        "rounded-md text-sm font-semibold transition-colors border-none",
+        isActive 
+          ? "bg-blue-100 text-blue-700 hover:bg-blue-200 hover:text-blue-800" 
+          : "bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-600",
+        className
+      )}
       nativeButton={false}
       render={
         <a
@@ -64,36 +70,32 @@ function PaginationLink({
 
 function PaginationPrevious({
   className,
-  text = "Previous",
   ...props
-}: React.ComponentProps<typeof PaginationLink> & { text?: string }) {
+}: React.ComponentProps<typeof PaginationLink>) {
   return (
     <PaginationLink
       aria-label="Go to previous page"
-      size="default"
-      className={cn("pl-2!", className)}
+      size="icon-sm"
+      className={cn("bg-transparent text-gray-300 hover:bg-transparent hover:text-gray-400 p-0", className)}
       {...props}
     >
-      <ChevronLeftIcon data-icon="inline-start" />
-      <span className="hidden sm:block">{text}</span>
+      <ChevronLeftIcon className="w-5 h-5" />
     </PaginationLink>
   )
 }
 
 function PaginationNext({
   className,
-  text = "Next",
   ...props
-}: React.ComponentProps<typeof PaginationLink> & { text?: string }) {
+}: React.ComponentProps<typeof PaginationLink>) {
   return (
     <PaginationLink
       aria-label="Go to next page"
-      size="default"
-      className={cn("pr-2!", className)}
+      size="icon-sm"
+      className={cn("bg-transparent text-gray-300 hover:bg-transparent hover:text-gray-400 p-0", className)}
       {...props}
     >
-      <span className="hidden sm:block">{text}</span>
-      <ChevronRightIcon data-icon="inline-end" />
+      <ChevronRightIcon className="w-5 h-5" />
     </PaginationLink>
   )
 }
